@@ -1,0 +1,24 @@
+{
+    "name": "butterycrumpet/supersimple-di-resolver",
+    "description": "A dependency injection resolver for psr-11 containers",
+    "type": "library",
+    "require-dev": {
+        "phpstan/phpstan": "^0.10.5",
+        "phpunit/phpunit": "^7.4"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "ButteryCrumpet",
+            "email": "crumpetybumpety@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "SuperSimpleDIResolver\\": "src"
+        }
+    },
+    "require": {
+        "psr/container": "^1.0"
+    }
+}
