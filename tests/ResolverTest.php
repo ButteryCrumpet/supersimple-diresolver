@@ -20,14 +20,21 @@ class ResolverTest extends TestCase
     {
         $this->container = $this->createMock(ContainerInterface::class);
         $this->container->method("get")
-            ->willReturnCallback(function ($str) use ($exception) {
+            ->willReturnCallback(function ($str) {
                 if ($str === "ServiceOne") {
                     return new ServiceOne();
                 }
                 if ($str === "ServiceTwo") {
                     return new ServiceTwo();
                 }
+                if ($str === "service3") {
+                    return new ServiceThree();
+                }
                 throw new ContainerExceptionMock();
+            });
+        $this->container->method("has")
+            ->willReturnCallback(function ($name) {
+                return $name === "service3";
             });
         $this->resolver = new Resolver($this->container);
     }
@@ -49,9 +56,18 @@ class ResolverTest extends TestCase
         );
     }
 
-    public function testResolvesWith()
+    public function testResolvesWithString()
     {
-        $service = $this->resolver->resolveWith(ServiceWith::class, ["message" => "this is a message"]);
+        $service = $this->resolver->resolve("service3");
+        $this->assertInstanceOf(
+            ServiceThree::class,
+            $service
+        );
+    }
+
+    public function testResolvesWithArgs()
+    {
+        $service = $this->resolver->resolve(ServiceWith::class, ["message" => "this is a message"]);
         $this->assertInstanceOf(
             ServiceWith::class,
             $service
@@ -61,7 +77,7 @@ class ResolverTest extends TestCase
     /**
      * @expectedException \Psr\Container\ContainerExceptionInterface
      */
-    public function testthrowsOnNoneExistingServive()
+    public function testThrowsOnNoneExistingService()
     {
         $this->resolver->resolve(ServiceError::class);
     }

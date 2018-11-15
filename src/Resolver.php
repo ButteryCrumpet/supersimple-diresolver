@@ -8,7 +8,7 @@ use Psr\Container\ContainerInterface;
  * Class Resolver
  * @package SuperSimpleDIResolver
  */
-class Resolver implements ResolverInterface
+class Resolver
 {
     /**
      * @var ContainerInterface
@@ -25,35 +25,6 @@ class Resolver implements ResolverInterface
     }
 
     /**
-     * Takes a class name and returns an instance
-     * of the class injected its dependencies resolved
-     * from the container.
-     *
-     * @param string $name
-     * @return mixed|object
-     * @throws \ReflectionException
-     */
-    public function resolve($name)
-    {
-        if (!class_exists($name)) {
-            throw new \InvalidArgumentException("$name is not a defined class.");
-        }
-
-        $reflection = new \ReflectionClass($name);
-        $params = $reflection->getConstructor()
-            ->getParameters();
-        $classes = array();
-        foreach ($params as $param) {
-            $class = $param->getClass();
-            if (is_null($class)) {
-                continue;
-            }
-            $classes[] = $this->container->get($class->name);
-        }
-        return $reflection->newInstanceArgs($classes);
-    }
-
-    /**
      * Takes a class name and extra named args
      * and returns an instance of the class injected
      * its dependencies resolved from the container
@@ -67,12 +38,22 @@ class Resolver implements ResolverInterface
      * @return mixed|object
      * @throws \ReflectionException
      */
-    public function resolveWith($name, array $args)
+    public function resolve($name, $args = array())
     {
+        if (!class_exists($name)) {
+            if ($this->container->has($name)) {
+                return $this->container->get($name);
+            }
+            throw new \InvalidArgumentException(
+                "$name is not a defined class or container service name."
+            );
+        }
+
         $reflection = new \ReflectionClass($name);
-        $params = $reflection->getConstructor()
+        $params = $reflection
+            ->getConstructor()
             ->getParameters();
-        $resolvedArgs = array();
+        $classes = array();
         foreach ($params as $param) {
             $class = $param->getClass();
             $arg = null;
@@ -83,8 +64,8 @@ class Resolver implements ResolverInterface
             } else {
                 $arg = $this->container->get($class->name);
             }
-            $resolvedArgs[] = $arg;
+            $classes[] = $arg;
         }
-        return $reflection->newInstanceArgs($resolvedArgs);
+        return $reflection->newInstanceArgs($classes);
     }
 }
