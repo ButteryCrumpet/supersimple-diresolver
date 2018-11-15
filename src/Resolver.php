@@ -51,7 +51,7 @@ class Resolver
 
         $reflection = new \ReflectionClass($name);
         $params = $reflection
-            ->getConstructor()
+            ->getConstructor() // can be null, check and return instances class if so
             ->getParameters();
         $classes = array();
         foreach ($params as $param) {
