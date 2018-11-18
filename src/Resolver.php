@@ -40,10 +40,11 @@ class Resolver
      */
     public function resolve($name, $args = array())
     {
+        if ($this->container->has($name)) {
+            return $this->container->get($name);
+        }
+
         if (!class_exists($name)) {
-            if ($this->container->has($name)) {
-                return $this->container->get($name);
-            }
             throw new \InvalidArgumentException(
                 "$name is not a defined class or container service name."
             );
