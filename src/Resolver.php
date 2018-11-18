@@ -51,9 +51,11 @@ class Resolver
         }
 
         $reflection = new \ReflectionClass($name);
-        $params = $reflection
-            ->getConstructor() // can be null, check and return instances class if so
-            ->getParameters();
+        $constructor = $reflection->getConstructor();
+        if (is_null($constructor)) {
+            return $reflection->newInstanceWithoutConstructor();
+        }
+        $params = $constructor->getParameters();
         $classes = array();
         foreach ($params as $param) {
             $class = $param->getClass();

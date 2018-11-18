@@ -30,11 +30,14 @@ class ResolverTest extends TestCase
                 if ($str === "service3") {
                     return new ServiceThree();
                 }
+                if ($str === ServiceFour::class) {
+                    return new ServiceFour();
+                }
                 throw new ContainerExceptionMock();
             });
         $this->container->method("has")
             ->willReturnCallback(function ($name) {
-                return $name === "service3";
+                return $name === "service3" || $name === ServiceFour::class;
             });
         $this->resolver = new Resolver($this->container);
     }
@@ -61,6 +64,15 @@ class ResolverTest extends TestCase
         $service = $this->resolver->resolve("service3");
         $this->assertInstanceOf(
             ServiceThree::class,
+            $service
+        );
+    }
+
+    public function testResolvesWithClassNameIfExitsInContainer()
+    {
+        $service = $this->resolver->resolve(ServiceFour::class);
+        $this->assertInstanceOf(
+            ServiceFour::class,
             $service
         );
     }
@@ -100,7 +112,7 @@ class Service
 class ServiceOne{};
 class ServiceTwo{};
 class ServiceThree{};
-
+class ServiceFour{};
 class ServiceError
 {
     public function __construct(ServiceOne $one, ServiceThree $three)
